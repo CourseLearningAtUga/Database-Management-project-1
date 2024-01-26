@@ -280,7 +280,12 @@ public class Table
         List <Comparable []> rows = new ArrayList <> ();
 
         //  T O   B E   I M P L E M E N T E D 
-
+        for(int i=0;i<tuples.size();i++){
+            rows.add(tuples.get(i).clone());
+        }
+        for(int i=0;i<table2.tuples.size();i++){
+            rows.add(table2.tuples.get(i).clone());
+        }
         return new Table (name + count++, attribute, domain, key, rows);
     } // union
 
