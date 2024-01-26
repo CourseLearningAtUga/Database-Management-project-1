@@ -306,7 +306,31 @@ public class Table
         List <Comparable []> rows = new ArrayList <> ();
 
         //  T O   B E   I M P L E M E N T E D 
+        for(int i=0;i<tuples.size();i++){
+            var currMain=tuples.get(i);
+            boolean ispresent_intable2=false;
 
+            for(int j=0;j<table2.tuples.size();j++){
+                var currSecondary=table2.tuples.get(j);
+                boolean currentsecondrow_issame_as_first=true;
+                for(int k=0;k<currMain.length;k++){
+                    if(!currMain[k].equals(currSecondary[k])) {
+                        currentsecondrow_issame_as_first = false;
+                        break;
+                    }
+                }
+                if(currentsecondrow_issame_as_first){
+                    ispresent_intable2=true;
+                    break;
+                }
+            }
+
+            if(!ispresent_intable2){
+                rows.add(currMain.clone());
+            }
+
+
+        }
         return new Table (name + count++, attribute, domain, key, rows);
     } // minus
 
