@@ -101,7 +101,12 @@ class MovieDB
         out.println ();
         var t_project = movie.project ("title year");
         t_project.print ();
+        //++++++++++++++tests written by vishal++++++++++++++++++++++++++++++//
 
+        var t_project1 = movie.project ("title length studioName producerNo");
+        t_project1.print ();
+
+        //++++++++++++++tests written by vishal++++++++++++++++++++++++++++++//
         //--------------------- select: equals, &&
 
         out.println ();

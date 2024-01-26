@@ -179,12 +179,32 @@ public class Table
     {
         out.println ("RA> " + name + ".project (" + attributes + ")");
         var attrs     = attributes.split (" ");
+
         var colDomain = extractDom (match (attrs), domain);
         var newKey    = (Arrays.asList (attrs).containsAll (Arrays.asList (key))) ? key : attrs;
 
+
+        HashSet<String> hs=new HashSet<>();
+        for(int i=0;i<attrs.length;i++){
+            hs.add(attrs[i]);
+        }
         List <Comparable []> rows = new ArrayList <> ();
 
         //  T O   B E   I M P L E M E N T E D 
+        for(int i=0;i<tuples.size();i++){
+            var curr=tuples.get(i);
+            var ans=new Comparable[attrs.length];
+            var count=0;
+            for(int j=0;j<curr.length;j++) {
+//                System.out.print(attribute[j]+" ");
+                if (hs.contains(attribute[j])) {
+//                    System.out.print("/"+attribute[j]+" "+ans[count]+" "+curr[i]+"\\");
+                    ans[count] = curr[j];
+                    count++;
+                }
+            }
+            rows.add(ans);
+        }
 
         return new Table (name + count++, attrs, colDomain, newKey, rows);
     } // project
