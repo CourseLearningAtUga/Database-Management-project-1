@@ -355,7 +355,49 @@ public class Table
         var u_attrs = attributes2.split (" ");
         var rows    = new ArrayList <Comparable []> ();
 
-        //  T O   B E   I M P L E M E N T E D 
+
+        //  T O   B E   I M P L E M E N T E D
+
+        int col_of_t_attrs=0;
+        int col_of_u_attrs=0;
+        for(int i=0;i<attribute.length;i++){
+            if(attribute[i].equals(t_attrs[0])){
+                col_of_t_attrs=i;
+                break;
+            }
+        }
+        for(int i=0;i<table2.attribute.length;i++){
+            if(table2.attribute[i].equals(u_attrs[0])){
+                col_of_u_attrs=i;
+                break;
+            }
+        }
+        for(int i=0;i<tuples.size();i++){
+            var curradd=new Comparable[attribute.length+table2.attribute.length];
+            var currfirstrow=tuples.get(i);
+            int count=0;
+            for(int j=0;j<currfirstrow.length;j++){
+                curradd[count++]=currfirstrow[j];
+            }
+            for(int j=0;j<table2.tuples.size();j++){
+                var currsecondrow=table2.tuples.get(j);
+                if(currfirstrow[col_of_t_attrs].equals(currsecondrow[col_of_u_attrs])){
+                    for(int k=0;k<currsecondrow.length;k++){
+                        if(k==col_of_u_attrs)
+                        {
+                            curradd[count++]=currsecondrow[k]+"2";
+                        }
+                            else{
+                            curradd[count++]=currsecondrow[k];
+                        }
+
+                    }
+
+                    break;
+                }
+            }
+            rows.add(curradd);
+        }
 
         return new Table (name + count++, concat (attribute, table2.attribute),
                                           concat (domain, table2.domain), key, rows);
