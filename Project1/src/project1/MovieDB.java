@@ -119,7 +119,13 @@ class MovieDB
         out.println ();
         var t_select2 = movie.select (t -> (Integer) t[movie.col("year")] < 1980);
         t_select2.print ();
+        //++++++++++++++tests written by vishal++++++++++++++++++++++++++++++//
 
+        out.println ();
+        var t_select3 = movie.select ("year<=1990");
+        t_select3.print ();
+
+        //++++++++++++++tests written by vishal++++++++++++++++++++++++++++++//
         //--------------------- indexed select: key
 
         out.println ();

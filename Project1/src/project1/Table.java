@@ -17,6 +17,8 @@ import java.util.stream.*;
 import static java.lang.Boolean.*;
 import static java.lang.System.arraycopy;
 import static java.lang.System.out;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /****************************************************************************************
  * The Table class implements relational database tables (including attribute names, domains
@@ -220,12 +222,43 @@ public class Table
     public Table select (Predicate <Comparable []> predicate)
     {
         out.println (STR."RA> \{name}.select (\{predicate})");
-
         return new Table (name + count++, attribute, domain, key,
                    tuples.stream ().filter (t -> predicate.test (t))
                                    .collect (Collectors.toList ()));
     } // select
+    /************************************************************************************
+     *
+     */
+    private Comparable convertToComparable(String input, Class targetClass) {
+        if (input == null || targetClass == null) {
+            return null;
+        }
 
+        switch (targetClass.getSimpleName()) {
+            case "Long":
+                return Long.parseLong(input);
+            case "Integer":
+                return Integer.parseInt(input);
+            case "Short":
+                return Short.parseShort(input);
+            case "Byte":
+                return Byte.parseByte(input);
+            case "Double":
+                return Double.parseDouble(input);
+            case "Float":
+                return Float.parseFloat(input);
+            case "Character":
+                if (input.length() == 1) {
+                    return input.charAt(0);
+                }
+                break;
+            case "String":
+                return input;
+        }
+
+        System.out.println("Conversion to " + targetClass.getSimpleName() + " not supported.");
+        return null;
+    }
     /************************************************************************************
      * Select the tuples satisfying the given simple condition on attributes/constants
      * compared using an <op> ==, !=, <, <=, >, >=.
@@ -242,7 +275,66 @@ public class Table
         List <Comparable []> rows = new ArrayList <> ();
 
         //  T O   B E   I M P L E M E N T E D
+//        System.out.println("============================================1");
+        Pattern regex = Pattern.compile("\\s*(==|!=|<=|<|>=|>)\\s*");
+        Matcher match = regex.matcher(condition);
+        String[] conditions=new String[0];
+        String operator="";
 
+        if (match.find()){
+            operator=match.group(1);
+            conditions=condition.split(operator);
+            for (int i = 0; i < conditions.length; i++) {
+                conditions[i] = conditions[i].trim();
+            }
+//            for (String part : conditions) {
+//                System.out.println(part);
+//            }
+        }
+        else{
+            System.out.println("no operator found");
+            return new Table (name + count++, attribute, domain, key, rows);
+        }
+
+
+        int indexofattribute=-1;
+        for(int i=0;i<attribute.length;i++){
+            if(conditions[0].equals(attribute[i])){
+                indexofattribute=i;
+                break;
+            }
+        }
+        if(indexofattribute==-1 || operator.equals("")){
+            return new Table (name + count++, attribute, domain, key, rows);
+        }
+        for(int i=0;i<tuples.size();i++){
+            var currrow=tuples.get(i);
+            boolean satisfied=false;
+            switch (operator){
+                case "==":
+                      satisfied=currrow[indexofattribute].equals(convertToComparable(conditions[1],domain[indexofattribute]));
+                    break;
+                case "!=":
+                    satisfied=!currrow[indexofattribute].equals(convertToComparable(conditions[1],domain[indexofattribute]));
+                    break;
+                case "<":
+                    satisfied=currrow[indexofattribute].compareTo(convertToComparable(conditions[1],domain[indexofattribute]))<0;
+                    break;
+                case "<=":
+                    satisfied=currrow[indexofattribute].compareTo(convertToComparable(conditions[1],domain[indexofattribute]))<=0;
+                    break;
+                case ">":
+                    satisfied=currrow[indexofattribute].compareTo(convertToComparable(conditions[1],domain[indexofattribute]))>0;
+                    break;
+                case ">=":
+                    satisfied=currrow[indexofattribute].compareTo(convertToComparable(conditions[1],domain[indexofattribute]))>=0;
+                    break;
+            }
+            if(satisfied){
+                rows.add(currrow);
+            }
+        }
+//        System.out.println("============================================2");
         return new Table (name + count++, attribute, domain, key, rows);
     } // select
 
