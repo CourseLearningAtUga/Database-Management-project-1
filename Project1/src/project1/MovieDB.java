@@ -156,6 +156,10 @@ class MovieDB
         var t_join2 = movie.join (cinema);
         t_join2.print ();
 
+        //---------------------- theta join: movie Join studio
+        out.println ();
+        var t_join3 =movie.join ("studioName == name", studio);
+        t_join3.print();
     } // main
 
 } // MovieDB class

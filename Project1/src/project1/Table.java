@@ -514,6 +514,70 @@ public class Table
         var rows = new ArrayList <Comparable []> ();
 
         //  T O   B E   I M P L E M E N T E D
+        var conditions=condition.split(" ");
+        for(int i=0;i<conditions.length;i++){
+            System.out.println(conditions[i]);
+        }
+        int col_of_left=-1;
+        int col_of_right=-1;
+        for(int i=0;i<attribute.length;i++){
+            if(attribute[i].equals(conditions[0])){
+                col_of_left=i;
+                break;
+            }
+        }
+        for(int i=0;i<table2.attribute.length;i++){
+            if(table2.attribute[i].equals(conditions[2])){
+                col_of_right=i;
+                break;
+            }
+        }
+        for(int i=0;i<tuples.size();i++){
+            var currleft=tuples.get(i);
+            for(int j=0;j<table2.tuples.size();j++){
+                var currright=table2.tuples.get(j);
+                boolean satisfied=false;
+                switch (conditions[1]){
+                    case "==":
+                        satisfied=currleft[col_of_left].equals(currright[col_of_right]);
+                        break;
+                    case "!=":
+                        satisfied=!currleft[col_of_left].equals(currright[col_of_right]);
+                        break;
+                    case "<":
+                        satisfied=currleft[col_of_left].compareTo(currright[col_of_right])<0;
+                        break;
+                    case "<=":
+                        satisfied=currleft[col_of_left].compareTo(currright[col_of_right])<=0;
+                        break;
+                    case ">":
+                        satisfied=currleft[col_of_left].compareTo(currright[col_of_right])>0;
+                        break;
+                    case ">=":
+                        satisfied=currleft[col_of_left].compareTo(currright[col_of_right])>=0;
+                        break;
+                    default:
+                        System.out.println("wrong operator");
+                }
+                if(satisfied){
+                    var curradd=new Comparable[attribute.length+table2.attribute.length];
+                    int count=0;
+                    for(int k=0;k<currleft.length;k++){
+                        curradd[count++]=currleft[k];
+                    }
+                    for(int k=0;k<currright.length;k++){
+                        if(k==col_of_right){
+                            curradd[count++]=currright[k]+"2";
+                        }
+                        else{
+                            curradd[count++]=currright[k];
+                        }
+
+                    }
+                    rows.add(curradd);
+                }
+            }
+        }
 
         return new Table (name + count++, concat (attribute, table2.attribute),
                                           concat (domain, table2.domain), key, rows);
