@@ -910,8 +910,24 @@ public class Table
     private boolean typeCheck (Comparable [] t)
     {
         //  T O   B E   I M P L E M E N T E D
+        // Check if the tuple size matches the domain size
+        if (t.length != domain.length) {
+            return false;
+        }
 
-        return true;      // change once implemented
+        // Check each value in the tuple against the corresponding domain
+        for (int i = 0; i < t.length; i++) {
+            // Check if the value is null
+            if (t[i] == null) {
+                continue; // Allow null values
+            }
+            // Check if the value is an instance of the expected domain type
+            if (!domain[i].isInstance(t[i])) {
+                return false; // Type mismatch
+            }
+        }
+        // All checks passed, the tuple is valid
+        return true;    // change once implemented
     } // typeCheck
 
     /************************************************************************************
