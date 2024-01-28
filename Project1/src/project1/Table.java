@@ -6,7 +6,7 @@ package project1;
  * @author   John Miller
  *
  * compile javac --enable-preview --release 21 *.java
- * run     java --enable-preview MovieDB    
+ * run     java --enable-preview MovieDB
  */
 
 import java.io.*;
@@ -31,7 +31,7 @@ public class Table
 {
     /** Relative path for storage directory
      */
-    private static final String DIR = "store" + File.separator;
+    private static final String DIR = "";
 
     /** Filename extension for database files
      */
@@ -60,13 +60,14 @@ public class Table
      */
     private final List <Comparable []> tuples;
 
-    /** Primary key (the attributes forming). 
+    /** Primary key (the attributes forming).
      */
     private final String [] key;
 
     /** Index into tuples (maps key to tuple).
      */
     private final Map <KeyType, Comparable []> index;
+//    private final String name;
 
     /** The supported map types.
      */
@@ -118,7 +119,7 @@ public class Table
      * @param _attribute  the string containing attributes names
      * @param _domain     the string containing attribute domains (data types)
      * @param _key        the primary key
-     */  
+     */
     public Table (String _name, String [] _attribute, Class [] _domain, String [] _key)
     {
         name      = _name;
@@ -137,7 +138,7 @@ public class Table
      * @param _domain     the string containing attribute domains (data types)
      * @param _key        the primary key
      * @param _tuples     the list of tuples containing the data
-     */  
+     */
     public Table (String _name, String [] _attribute, Class [] _domain, String [] _key,
                   List <Comparable []> _tuples)
     {
@@ -192,7 +193,7 @@ public class Table
         }
         List <Comparable []> rows = new ArrayList <> ();
 
-        //  T O   B E   I M P L E M E N T E D 
+        //  T O   B E   I M P L E M E N T E D
         for(int i=0;i<tuples.size();i++){
             var curr=tuples.get(i);
             var ans=new Comparable[attrs.length];
@@ -371,7 +372,7 @@ public class Table
 
         List <Comparable []> rows = new ArrayList <> ();
 
-        //  T O   B E   I M P L E M E N T E D 
+        //  T O   B E   I M P L E M E N T E D
         for(int i=0;i<tuples.size();i++){
             rows.add(tuples.get(i).clone());
         }
@@ -397,7 +398,7 @@ public class Table
 
         List <Comparable []> rows = new ArrayList <> ();
 
-        //  T O   B E   I M P L E M E N T E D 
+        //  T O   B E   I M P L E M E N T E D
         for(int i=0;i<tuples.size();i++){
             var currMain=tuples.get(i);
             boolean ispresent_intable2=false;
@@ -545,16 +546,100 @@ public class Table
      * @param table2  the rhs table in the join operation
      * @return  a table with tuples satisfying the equality predicate
      */
+    private List<String> find_common_attributes(Table table2) {
+        List<String> commonAttributesAmongTable = new ArrayList<>();
+
+        for (String attr1 : attribute) {
+            for (String attr2 : table2.attribute) {
+                if (attr1.equals(attr2)) {
+                    commonAttributesAmongTable.add(attr1);
+                    break;
+                }
+            }
+        }
+
+        return commonAttributesAmongTable;
+    }
+    private boolean tuplesMatch(Comparable[] tuple1, Comparable[] tuple2, List<String> commonAttributes,Table table2) {
+        for (String attr : commonAttributes) {
+            int index1 = col(attr);
+            int index2 = table2.col(attr);
+            if (!tuple1[index1].equals(tuple2[index2])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    private String[] delete_duplicate_attributes(List<String> commonAttributes, String[] attributes) {
+        List<String> combinedAttributes = new ArrayList<>();
+
+        for (String attr : attribute) {
+
+            combinedAttributes.add(attr);
+        }
+
+        for (String attr : attributes) {
+            if (!commonAttributes.contains(attr)) {
+                combinedAttributes.add(attr);
+            }
+        }
+
+        return combinedAttributes.toArray(new String[0]);
+    }
     public Table join (Table table2)
     {
         out.println (STR."RA> \{name}.join (\{table2.name})");
 
         var rows = new ArrayList <Comparable []> ();
 
-        //  T O   B E   I M P L E M E N T E D 
+        //  T O   B E   I M P L E M E N T E D
 
-        // FIX - eliminate duplicate columns
-        return new Table (name + count++, concat (attribute, table2.attribute),
+        // Step 1 : Find the common attributes between current table and table2
+        List<String> commonAttributesAmongTables = find_common_attributes(table2);
+
+
+        if(commonAttributesAmongTables.isEmpty()){
+            //We can not perform join here as there's no attribute to compute join upon
+            out.println(STR."RA>Error: Can not perform join on tables as \{name} and \{table2.name} have no matching attribute(s)");
+            return new Table (name + count++, concat (attribute, table2.attribute),
+                    concat (domain, table2.domain), key, rows);
+        }
+
+        for (int i = 0; i < tuples.size(); i++) {
+            var tuple1 = tuples.get(i);
+
+            for (int j = 0; j < table2.tuples.size(); j++) {
+                var tuple2 = table2.tuples.get(j);
+
+                // Check if tuples match on common attributes
+                List<Comparable> combinedList = new ArrayList<>();
+
+                // Add elements from the first tuple
+                if(tuplesMatch(tuple1,tuple2,commonAttributesAmongTables,table2)){
+                    for (int t = 0; t < tuple1.length; t++) {
+
+                        if (commonAttributesAmongTables.contains(attribute[t])) {
+
+                            combinedList.add(tuple1[t]);
+                        }
+                    }
+                    // FIX - eliminate duplicates
+                    for ( int t= 0; t < tuple2.length; t++) {
+                        if (!commonAttributesAmongTables.contains(table2.attribute[t])) {
+                            combinedList.add(tuple2[t]);
+                        }
+                    }
+
+                    rows.add(combinedList.toArray(new Comparable[0]));
+                }
+
+            }
+        }
+
+        // eliminate duplicate columns names to show in the table column
+        String[] combinedAttributes = delete_duplicate_attributes(commonAttributesAmongTables, table2.attribute);
+
+        return new Table (name + count++, combinedAttributes,
                                           concat (domain, table2.domain), key, rows);
     } // join
 
@@ -648,7 +733,7 @@ public class Table
     } // printIndex
 
     /************************************************************************************
-     * Load the table with the given name into memory. 
+     * Load the table with the given name into memory.
      *
      * @param name  the name of the table to load
      */
@@ -680,6 +765,7 @@ public class Table
             oos.close ();
         } catch (IOException ex) {
             out.println ("save: IO Exception");
+            out.println(ex.getMessage());
             ex.printStackTrace ();
         } // try
     } // save
@@ -739,7 +825,7 @@ public class Table
      *
      * @param t       the tuple to extract from
      * @param column  the array of column names
-     * @return  a smaller tuple extracted from tuple t 
+     * @return  a smaller tuple extracted from tuple t
      */
     private Comparable [] extract (Comparable [] t, String [] column)
     {
@@ -751,15 +837,15 @@ public class Table
 
     /************************************************************************************
      * Check the size of the tuple (number of elements in array) as well as the type of
-     * each value to ensure it is from the right domain. 
+     * each value to ensure it is from the right domain.
      *
      * @param t  the tuple as a array of attribute values
      * @return  whether the tuple has the right size and values that comply
      *          with the given domains
      */
     private boolean typeCheck (Comparable [] t)
-    { 
-        //  T O   B E   I M P L E M E N T E D 
+    {
+        //  T O   B E   I M P L E M E N T E D
 
         return true;      // change once implemented
     } // typeCheck
