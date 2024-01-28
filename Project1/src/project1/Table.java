@@ -515,9 +515,9 @@ public class Table
 
         //  T O   B E   I M P L E M E N T E D
         var conditions=condition.split(" ");
-        for(int i=0;i<conditions.length;i++){
-            System.out.println(conditions[i]);
-        }
+        // for(int i=0;i<conditions.length;i++){
+        //     System.out.println(conditions[i]);
+        // }
         int col_of_left=-1;
         int col_of_right=-1;
         for(int i=0;i<attribute.length;i++){
