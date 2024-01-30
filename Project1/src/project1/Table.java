@@ -13,6 +13,9 @@ import java.io.*;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static java.lang.Boolean.*;
 import static java.lang.System.arraycopy;
@@ -31,7 +34,7 @@ public class Table
 {
     /** Relative path for storage directory
      */
-    private static final String DIR = "";
+    private static final String DIR = Paths.get(System.getProperty("user.dir")) + File.separator + "store" + File.separator;
 
     /** Filename extension for database files
      */
@@ -824,6 +827,7 @@ public class Table
     public void save ()
     {
         try {
+            Path relativePath = Paths.get(System.getProperty("user.dir")).resolve("store");
             var oos = new ObjectOutputStream (new FileOutputStream (DIR + name + EXT));
             oos.writeObject (this);
             oos.close ();
