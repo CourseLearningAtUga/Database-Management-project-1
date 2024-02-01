@@ -176,6 +176,9 @@ public class Table
     /************************************************************************************
      * Project the tuples onto a lower dimension by keeping only the given attributes.
      * Check whether the original key is included in the projection.
+     * Projects specified attributes from the current table and creates a new table
+     * with the projected attributes. The method extracts the attributes from the existing
+     * tuples and adjusts domain, key, and other properties accordingly.
      *
      * #usage movie.project ("title year studioNo")
      *
@@ -218,6 +221,8 @@ public class Table
 
     /************************************************************************************
      * Select the tuples satisfying the given predicate (Boolean function).
+     * Selects tuples from the current table based on the provided predicate
+     * and creates a new table containing only the selected tuples.
      *
      * #usage movie.select (t -> t[movie.col("year")].equals (1977))
      *
@@ -267,7 +272,7 @@ public class Table
     /************************************************************************************
      * Select the tuples satisfying the given simple condition on attributes/constants
      * compared using an <op> ==, !=, <, <=, >, >=.
-     *
+     * Selects tuples from the table based on a simple condition and creates a new table with the selected tuples.
      * #usage movie.select ("year == 1977")
      *
      * @param condition  the check condition as a string for tuples
@@ -346,6 +351,7 @@ public class Table
     /************************************************************************************
      * Select the tuples satisfying the given key predicate (key = value).  Use an index
      * (Map) to retrieve the tuple with the given key value.  INDEXED SELECT algorithm.
+     * The select method takes a KeyType parameter called keyVal and returns a table with the tuple satisfying the key predicate
      *
      * @param keyVal  the given key value
      * @return  a table with the tuple satisfying the key predicate
@@ -363,7 +369,8 @@ public class Table
 
     /************************************************************************************
      * Union this table and table2.  Check that the two tables are compatible.
-     *
+     * The union operation includes all unique tuples from both tables.
+     * Performs the union operation on two tables, creating a new table with unique tuples.
      * #usage movie.union (show)
      *
      * @param table2  the rhs table in the union operation
@@ -389,6 +396,9 @@ public class Table
     /************************************************************************************
      * Take the difference of this table and table2.  Check that the two tables are
      * compatible.
+     * Performs the set difference operation on two tables, creating a new table with tuples
+     * that exist in the current table but not in the specified table2.
+     * The operation includes all unique tuples from the current table that are not present in table2.
      *
      * #usage movie.minus (show)
      *
@@ -436,6 +446,9 @@ public class Table
      * are compared requiring attributes1 to equal attributes2.  Disambiguate attribute
      * names by appending "2" to the end of any duplicate attribute name.  Implement using
      * a NESTED LOOP JOIN ALGORITHM.
+     *
+     * Performs a join operation on two tables based on specified attributes,
+     * creating a new table with combined tuples where the values of the specified attributes match.
      *
      * #usage movie.join ("studioName", "name", studio)
      *
@@ -504,6 +517,9 @@ public class Table
      * Join this table and table2 by performing a "theta-join".  Tuples from both tables
      * are compared attribute1 <op> attribute2.  Disambiguate attribute names by appending "2"
      * to the end of any duplicate attribute name.  Implement using a Nested Loop Join algorithm.
+     *
+     * Performs a "theta-join" operation on two tables using a Nested Loop Join algorithm.
+     * Tuples from both tables are compared based on the specified condition, where attribute1 <op> attribute2.
      *
      * #usage movie.join ("studioName == name", studio)
      *
@@ -608,6 +624,8 @@ public class Table
      * Join this table and table2 by performing an NATURAL JOIN.  Tuples from both tables
      * are compared requiring common attributes to be equal.  The duplicate column is also
      * eliminated.
+     * Finds common attributes between this table and the specified table.
+     * Finds common attributes between two tables, facilitating the NATURAL JOIN operation.
      *
      * #usage movieStar.join (starsIn)
      *
@@ -628,6 +646,15 @@ public class Table
 
         return commonAttributesAmongTable;
     }
+    /**
+     * Checks if two tuples from different tables match based on the values of common attributes.
+     *
+     * @param tuple1 The first tuple from this table.
+     * @param tuple2 The second tuple from the specified table2.
+     * @param commonAttributes A list of common attributes shared between the two tables.
+     * @param table2 The second table for which the second tuple belongs.
+     * @return true if the tuples match on common attributes, false otherwise.
+     */
     private boolean tuplesMatch(Comparable[] tuple1, Comparable[] tuple2, List<String> commonAttributes,Table table2) {
         for (String attr : commonAttributes) {
             int index1 = col(attr);
@@ -638,6 +665,15 @@ public class Table
         }
         return true;
     }
+    /**
+     * Deletes duplicate attributes from the combined list of attributes, keeping only one occurrence
+     * of common attributes and appending unique attributes from the specified list.
+     *
+     * @param commonAttributes A list of common attributes shared between the two tables.
+     * @param attributes The list of attributes to be appended to the combined list.
+     * @return An array of attributes without duplicates, combining the common attributes
+     *         from this table and the unique attributes from the specified list.
+     */
     private String[] delete_duplicate_attributes(List<String> commonAttributes, String[] attributes) {
         List<String> combinedAttributes = new ArrayList<>();
 
@@ -654,6 +690,17 @@ public class Table
 
         return combinedAttributes.toArray(new String[0]);
     }
+    /**
+     * Performs a NATURAL JOIN operation on this table and the specified table2.
+     * Tuples from both tables are compared requiring common attributes to be equal,
+     * and the duplicate column is eliminated. The result is a new table with combined tuples.
+     *
+     * #usage movie.join (starsIn)
+     *
+     * @param table2 The second table (rhs table) in the join operation.
+     * @return A new table with tuples satisfying the equality predicate.
+     *         The result includes only one occurrence of common attributes and unique attributes from both tables.
+     */
     public Table join (Table table2)
     {
         out.println (STR."RA> \{name}.join (\{table2.name})");
